@@ -5,9 +5,9 @@ import { EvaluationResult } from './types';
 import { CONFIG } from './config';
 
 const client = new OpenAI({
-  apiKey: CONFIG.nvidia.apiKey,
-  baseURL: CONFIG.nvidia.baseURL,
-  timeout: 120000,
+  apiKey: CONFIG.ai.apiKey,
+  baseURL: CONFIG.ai.baseURL,
+  timeout: 45000,
   maxRetries: 0,
 });
 
@@ -154,18 +154,18 @@ Evaluate this ${callType} call transcript against the rubric above. Return ONLY 
 
   let lastError: Error | null = null;
 
-  // Retry once after a bounded request so a provider outage becomes a visible failure.
-  for (let attempt = 1; attempt <= 2; attempt++) {
+  // Use one bounded request so provider failures become visible quickly.
+  for (let attempt = 1; attempt <= 1; attempt++) {
     try {
       const response = await client.chat.completions.create({
-        model: CONFIG.nvidia.model,
+        model: CONFIG.ai.model,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
         response_format: { type: 'json_object' },
         temperature: 0.1,
-        max_tokens: 5000,
+        max_tokens: 3200,
       });
 
       const content = response.choices[0].message.content;
@@ -178,12 +178,8 @@ Evaluate this ${callType} call transcript against the rubric above. Return ONLY 
     } catch (error: any) {
       lastError = error;
       console.error(`NVIDIA NIM attempt ${attempt} failed:`, error.message);
-      if (attempt < 2) {
-        // Wait before retry
-        await new Promise(r => setTimeout(r, 1000));
-      }
     }
   }
 
-  throw new Error(`NVIDIA NIM evaluation failed after 3 attempts: ${lastError?.message}`);
+  throw new Error(`AI evaluation failed: ${lastError?.message || 'Unknown provider error'}`);
 }
