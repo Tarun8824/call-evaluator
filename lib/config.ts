@@ -6,6 +6,6 @@ export const CONFIG = {
   ai: {
     apiKey: process.env.NVIDIA_API_KEY || '',
     baseURL: 'https://integrate.api.nvidia.com/v1',
-    model: 'meta/llama-3.1-70b-instruct',
+    model: 'meta/llama-3.1-8b-instruct',
   },
 };

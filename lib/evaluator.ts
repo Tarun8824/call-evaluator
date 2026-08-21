@@ -7,7 +7,7 @@ import { CONFIG } from './config';
 const client = new OpenAI({
   apiKey: CONFIG.ai.apiKey,
   baseURL: CONFIG.ai.baseURL,
-  timeout: 45000,
+  timeout: 28000,
   maxRetries: 0,
 });
 
@@ -165,7 +165,7 @@ Evaluate this ${callType} call transcript against the rubric above. Return ONLY 
         ],
         response_format: { type: 'json_object' },
         temperature: 0.1,
-        max_tokens: 3200,
+        max_tokens: 2400,
       });
 
       const content = response.choices[0].message.content;
