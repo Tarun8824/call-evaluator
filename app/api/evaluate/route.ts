@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { transcript, callType } = body;
 
-    if (!transcript || !callType) {
+    if (!transcript || !['kickoff', 'coaching'].includes(callType)) {
       return Response.json({ error: 'Missing transcript or callType' }, { status: 400 });
     }
 

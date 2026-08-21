@@ -7,6 +7,8 @@ import { CONFIG } from './config';
 const client = new OpenAI({
   apiKey: CONFIG.nvidia.apiKey,
   baseURL: CONFIG.nvidia.baseURL,
+  timeout: 120000,
+  maxRetries: 0,
 });
 
 const JSON_SCHEMA_DESCRIPTION = `You must respond with a single valid JSON object matching this exact structure:
@@ -61,9 +63,11 @@ function stripMarkdownJson(raw: string): string {
   return cleaned;
 }
 
-function validateResult(parsed: any): EvaluationResult {
-  if (!parsed.dimensions || !Array.isArray(parsed.dimensions) || parsed.dimensions.length === 0) {
-    throw new Error('Invalid evaluation: no dimensions returned');
+const NO_EVIDENCE = 'No direct transcript evidence found for this behavior.';
+
+function validateResult(parsed: any, transcript: string): EvaluationResult {
+  if (!parsed.dimensions || !Array.isArray(parsed.dimensions) || parsed.dimensions.length !== 12) {
+    throw new Error('Invalid evaluation: exactly 12 dimensions are required');
   }
   if (typeof parsed.totalScore !== 'number') {
     throw new Error('Invalid evaluation: totalScore missing');
@@ -71,7 +75,7 @@ function validateResult(parsed: any): EvaluationResult {
   if (typeof parsed.maxPossibleScore !== 'number') {
     throw new Error('Invalid evaluation: maxPossibleScore missing');
   }
-  if (!['ELITE', 'STRONG', 'INCONSISTENT', 'AT RISK', 'FAIL'].includes(parsed.band)) {
+  if (!['ELITE', 'STRONG', 'INCONSISTENT', 'AT RISK', 'AT_RISK', 'FAIL'].includes(parsed.band)) {
     throw new Error('Invalid evaluation: band missing or invalid');
   }
   if (!parsed.theOneThing || typeof parsed.theOneThing.change !== 'string') {
@@ -95,8 +99,19 @@ function validateResult(parsed: any): EvaluationResult {
     if (!Array.isArray(dim.evidence) || dim.evidence.length === 0) {
       throw new Error(`Dimension ${dim.name} missing evidence`);
     }
+    for (const evidence of dim.evidence) {
+      if (typeof evidence.quote !== 'string' || (!transcript.includes(evidence.quote) && evidence.quote !== NO_EVIDENCE)) {
+        throw new Error(`Dimension ${dim.name} contains non-verbatim evidence`);
+      }
+    }
   }
 
+  const total = parsed.dimensions.reduce((sum: number, dimension: any) => sum + dimension.score, 0);
+  if (total !== parsed.totalScore) {
+    throw new Error('Invalid evaluation: totalScore does not equal dimension scores');
+  }
+
+  if (parsed.band === 'AT_RISK') parsed.band = 'AT RISK';
   return parsed as EvaluationResult;
 }
 
@@ -139,8 +154,8 @@ Evaluate this ${callType} call transcript against the rubric above. Return ONLY 
 
   let lastError: Error | null = null;
 
-  // Retry up to 3 times
-  for (let attempt = 1; attempt <= 3; attempt++) {
+  // Retry once after a bounded request so a provider outage becomes a visible failure.
+  for (let attempt = 1; attempt <= 2; attempt++) {
     try {
       const response = await client.chat.completions.create({
         model: CONFIG.nvidia.model,
@@ -159,11 +174,11 @@ Evaluate this ${callType} call transcript against the rubric above. Return ONLY 
       const cleaned = stripMarkdownJson(content);
       const parsed = JSON.parse(cleaned);
 
-      return validateResult(parsed);
+      return validateResult(parsed, transcript);
     } catch (error: any) {
       lastError = error;
       console.error(`NVIDIA NIM attempt ${attempt} failed:`, error.message);
-      if (attempt < 3) {
+      if (attempt < 2) {
         // Wait before retry
         await new Promise(r => setTimeout(r, 1000));
       }

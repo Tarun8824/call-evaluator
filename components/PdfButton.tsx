@@ -21,28 +21,33 @@ export default function PdfButton({ run }: Props) {
       const { jsPDF } = await import('jspdf');
 
       const element = pdfRef.current;
+      await document.fonts?.ready;
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
         logging: false,
+        backgroundColor: '#ffffff',
+        width: element.scrollWidth,
+        windowWidth: element.scrollWidth,
       });
 
-      const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      const pdfPageHeight = pdf.internal.pageSize.getHeight();
+      const pageHeightPx = Math.floor(canvas.width * pdfPageHeight / pdfWidth);
 
-      let heightLeft = pdfHeight;
-      let position = 0;
-
-      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
-      heightLeft -= pdf.internal.pageSize.getHeight();
-
-      while (heightLeft > 0) {
-        position = heightLeft - pdfHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
-        heightLeft -= pdf.internal.pageSize.getHeight();
+      for (let offset = 0; offset < canvas.height; offset += pageHeightPx) {
+        const pageCanvas = document.createElement('canvas');
+        pageCanvas.width = canvas.width;
+        pageCanvas.height = Math.min(pageHeightPx, canvas.height - offset);
+        const context = pageCanvas.getContext('2d');
+        if (!context) throw new Error('Unable to create PDF page canvas');
+        context.fillStyle = '#ffffff';
+        context.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+        context.drawImage(canvas, 0, offset, canvas.width, pageCanvas.height, 0, 0, canvas.width, pageCanvas.height);
+        if (offset > 0) pdf.addPage();
+        const pageHeightMm = pageCanvas.height * pdfWidth / pageCanvas.width;
+        pdf.addImage(pageCanvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, pdfWidth, pageHeightMm);
       }
 
       pdf.save(`evaluation-${run.id}.pdf`);
@@ -63,8 +68,8 @@ export default function PdfButton({ run }: Props) {
       >
         {isGenerating ? 'Generating...' : 'Download PDF'}
       </button>
-      <div className="fixed left-[-9999px] top-0">
-        <div ref={pdfRef}>
+      <div className="pointer-events-none absolute left-0 top-0 z-[-1] opacity-[0.01]" aria-hidden="true">
+        <div ref={pdfRef} style={{ width: '794px' }}>
           <PdfReport run={run} />
         </div>
       </div>

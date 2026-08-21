@@ -12,12 +12,16 @@ export default function RunPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let interval: ReturnType<typeof setInterval>;
     const fetchRun = async () => {
       try {
         const res = await fetch(`/api/run/${params.id}`);
         const data = await res.json();
         if (res.ok) {
           setRun(data);
+          if (data.status === 'completed' || data.status === 'failed') {
+            clearInterval(interval);
+          }
         } else {
           setError(data.error || 'Failed to load run');
         }
@@ -30,7 +34,7 @@ export default function RunPage() {
 
     fetchRun();
 
-    const interval = setInterval(() => {
+    interval = setInterval(() => {
       fetchRun();
     }, 3000);
 
