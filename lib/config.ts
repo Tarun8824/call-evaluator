@@ -6,7 +6,6 @@ export const CONFIG = {
   nvidia: {
     apiKey: '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',
     baseURL: 'https://integrate.api.nvidia.com/v1',
-    model: 'meta/llama-3.1-405b-instruct',
-    // Fallback to 'meta/llama-3.1-70b-instruct' if 405B is slow or unavailable
+    model: 'meta/llama-3.1-70b-instruct',
   },
 };

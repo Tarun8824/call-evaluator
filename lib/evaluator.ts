@@ -123,6 +123,7 @@ CRITICAL RULES:
 11. When scoring, prefer the lower tier if evidence is ambiguous. Never score from impressions.
 12. totalScore must exactly equal the sum of all dimension scores.
 13. maxPossibleScore is 100 when no dimensions are disabled, 85 when D4 is disabled.
+14. Keep reasoning, quickFix, and theBrief concise so the evaluation completes quickly.
 
 ${JSON_SCHEMA_DESCRIPTION}
 
@@ -149,7 +150,7 @@ Evaluate this ${callType} call transcript against the rubric above. Return ONLY 
         ],
         response_format: { type: 'json_object' },
         temperature: 0.1,
-        max_tokens: 8000,
+        max_tokens: 5000,
       });
 
       const content = response.choices[0].message.content;
@@ -164,7 +165,7 @@ Evaluate this ${callType} call transcript against the rubric above. Return ONLY 
       console.error(`NVIDIA NIM attempt ${attempt} failed:`, error.message);
       if (attempt < 3) {
         // Wait before retry
-        await new Promise(r => setTimeout(r, 2000 * attempt));
+        await new Promise(r => setTimeout(r, 1000));
       }
     }
   }
