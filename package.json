@@ -8,7 +8,6 @@
     "start": "next start"
   },
   "dependencies": {
-    "@next/swc-win32-x64-msvc": "^14.2.0",
     "@supabase/postgrest-js": "^2.112.3",
     "@supabase/storage-js": "^2.112.3",
     "@supabase/supabase-js": "^2.39.0",
