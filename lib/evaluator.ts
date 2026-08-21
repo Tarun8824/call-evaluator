@@ -169,7 +169,7 @@ Evaluate this ${callType} call transcript against the rubric above. Return ONLY 
       });
 
       const content = response.choices[0].message.content;
-      if (!content) throw new Error('Empty response from NVIDIA NIM');
+      if (!content) throw new Error('Empty response from Groq');
 
       const cleaned = stripMarkdownJson(content);
       const parsed = JSON.parse(cleaned);
@@ -177,7 +177,7 @@ Evaluate this ${callType} call transcript against the rubric above. Return ONLY 
       return validateResult(parsed, transcript);
     } catch (error: any) {
       lastError = error;
-      console.error(`NVIDIA NIM attempt ${attempt} failed:`, error.message);
+      console.error(`Groq attempt ${attempt} failed:`, error.message);
     }
   }
 
