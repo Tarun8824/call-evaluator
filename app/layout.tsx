@@ -1,3 +1,5 @@
+import './globals.css';
+
 export const metadata = {
   title: 'EvalAI | Clinical Intelligence',
   description: 'AI-powered call quality evaluation',
