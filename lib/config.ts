@@ -6,6 +6,6 @@ export const CONFIG = {
   ai: {
     apiKey: process.env.GROQ_API_KEY || '',
     baseURL: 'https://api.groq.com/openai/v1',
-    model: 'llama-3.1-8b-instant',
+    model: 'llama-3.3-70b-versatile',
   },
 };
