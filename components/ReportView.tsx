@@ -20,77 +20,28 @@ export default function ReportView({ run }: { run: Run }) {
   const percentage = Math.round((result.totalScore / result.maxPossibleScore) * 100);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
-          <div className="flex justify-between items-start mb-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Evaluation Report</h1>
-              <p className="text-sm text-gray-500 mt-1">
-                {run.call_type === 'kickoff' ? 'Kick-off Call' : 'Coaching Call'} • {new Date(run.created_at).toLocaleDateString()}
-              </p>
-            </div>
-            <PdfButton run={run} />
-          </div>
-
-          <div className="flex items-center gap-4 mb-6">
-            <div className={`text-4xl font-bold px-4 py-2 rounded-lg border ${getBandColor(result.band)}`}>
-              {result.totalScore}/{result.maxPossibleScore}
-            </div>
-            <div>
-              <div className={`inline-block px-3 py-1 rounded-full text-sm font-semibold border ${getBandColor(result.band)}`}>
-                {result.band}
-              </div>
-              <p className="text-sm text-gray-500 mt-1">{percentage}%</p>
-            </div>
-          </div>
-
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">The Brief</h2>
-            <p className="text-gray-700 leading-relaxed">{result.theBrief}</p>
-          </div>
-
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <h2 className="text-lg font-semibold text-blue-900 mb-2">The One Thing</h2>
-            <p className="text-blue-800 mb-2">{result.theOneThing.change}</p>
-            <p className="text-sm text-blue-600">
-              Would have scored: <span className="font-semibold">{result.theOneThing.wouldHaveScored}/{result.maxPossibleScore}</span>
-            </p>
-          </div>
-
-          {result.redFlags.length > 0 && (
-            <div className="mb-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-3">Red Flags</h2>
-              <div className="space-y-3">
-                {result.redFlags.map((flag, i) => (
-                  <div key={i} className="bg-red-50 border border-red-200 rounded-lg p-4">
-                    <h3 className="font-medium text-red-900 mb-1">{flag.flag}</h3>
-                    <p className="text-sm text-red-700">{flag.why}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {result.appliedCaps.length > 0 && (
-            <div className="mb-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">Automatic Caps Applied</h2>
-              <ul className="list-disc list-inside text-sm text-gray-600">
-                {result.appliedCaps.map((cap, i) => (
-                  <li key={i}>{cap}</li>
-                ))}
-              </ul>
-            </div>
-          )}
+    <div className="min-h-screen bg-background text-on-surface">
+      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-outline-variant bg-surface-container-lowest px-4 py-4 md:px-8">
+        <div className="flex items-center gap-3"><a href="/" className="flex items-center gap-2 text-secondary hover:text-primary"><span className="material-symbols-outlined">arrow_back</span><span className="hidden text-sm sm:inline">Evaluations</span></a><div className="h-6 w-px bg-outline-variant" /><span className="material-symbols-outlined fill text-primary">analytics</span><strong className="text-xl text-primary">EvalAI</strong><span className="hidden border-l border-outline-variant pl-3 text-sm text-on-surface-variant md:inline">Evaluation Report</span></div>
+        <div className="flex items-center gap-3"><button type="button" onClick={() => navigator.clipboard?.writeText(window.location.href)} aria-label="Share report" className="rounded-full p-2 text-on-surface-variant hover:bg-surface-container-high"><span className="material-symbols-outlined">share</span></button><a href="/" className="rounded bg-primary px-4 py-2 text-xs font-bold uppercase tracking-wide text-white hover:bg-primary-container">New Evaluation</a></div>
+      </header>
+      <main className="mx-auto max-w-6xl px-4 py-8 md:px-8">
+        <div className="mb-8 flex flex-col items-start justify-between gap-4 border-b border-outline-variant pb-6 md:flex-row md:items-end">
+          <div><p className="mb-1 text-xs font-bold uppercase tracking-widest text-on-surface-variant">Evaluation Report</p><h1 className="text-3xl font-bold">{run.call_type === 'kickoff' ? 'Kick-off Call' : 'Coaching Call'} Evaluation</h1><p className="mt-2 flex items-center gap-2 text-sm text-secondary"><span className="material-symbols-outlined text-base">calendar_today</span>{new Date(run.created_at).toLocaleDateString()} • AI Assessor</p></div>
+          <PdfButton run={run} />
         </div>
-
-        <div className="space-y-4">
-          <h2 className="text-xl font-bold text-gray-900 px-1">Dimensions</h2>
-          {result.dimensions.map((dim) => (
-            <DimensionCard key={dim.id} dimension={dim} />
-          ))}
+        <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-12">
+          <div className="flex flex-col items-center justify-center rounded-lg border border-outline-variant bg-surface-container-lowest p-6 text-center shadow-sm md:col-span-4"><span className="mb-2 text-xs font-bold uppercase tracking-widest text-secondary">Overall Score</span><span className="text-6xl font-bold text-primary-container">{result.totalScore}</span><span className="text-sm text-secondary">/ {result.maxPossibleScore}</span><span className={`mt-4 rounded-full bg-surface-container px-3 py-1 text-sm font-semibold ${getBandColor(result.band)}`}>{result.band}</span></div>
+          <div className="flex flex-col justify-center rounded-lg border border-outline-variant border-l-4 border-l-primary bg-surface-container-lowest p-6 shadow-sm md:col-span-8"><span className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary"><span className="material-symbols-outlined text-base">lightbulb</span>The One Thing</span><h2 className="mb-2 text-xl font-semibold">{result.theOneThing.change}</h2><p className="text-sm leading-relaxed text-on-surface-variant">Focus on this change first. It could have raised the score to {result.theOneThing.wouldHaveScored}/{result.maxPossibleScore}.</p></div>
         </div>
-      </div>
+        <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
+          <section className="rounded-lg border border-outline-variant bg-surface-container-lowest p-6 shadow-sm"><h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-secondary">The Brief</h2><p className="text-sm leading-relaxed text-on-surface-variant">{result.theBrief}</p></section>
+          {result.redFlags.length > 0 && <section className="rounded-lg border border-red-200 bg-[#fffcfc] p-6 shadow-sm"><h2 className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-error"><span className="material-symbols-outlined text-base">warning</span>Red Flags</h2><ul className="list-disc space-y-2 pl-5 text-sm text-on-surface-variant">{result.redFlags.map((flag, index) => <li key={index}><strong>{flag.flag}</strong> {flag.why}</li>)}</ul></section>}
+        </div>
+        <div className="mb-4"><h2 className="text-xl font-semibold">Dimensions Assessed</h2></div>
+        <div className="space-y-4">{result.dimensions.map((dim) => <DimensionCard key={dim.id} dimension={dim} />)}</div>
+        {result.appliedCaps.length > 0 && <div className="mt-8 rounded-lg border border-outline-variant bg-surface-container-low p-5"><h2 className="mb-2 text-xs font-bold uppercase tracking-widest text-secondary">Automatic Caps Applied</h2><ul className="list-disc pl-5 text-sm text-on-surface-variant">{result.appliedCaps.map((cap, index) => <li key={index}>{cap}</li>)}</ul></div>}
+      </main>
     </div>
   );
 }

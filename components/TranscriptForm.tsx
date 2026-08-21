@@ -18,53 +18,54 @@ export default function TranscriptForm({ onSubmit, isSubmitting }: Props) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-lg shadow-sm border">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-6 rounded-xl border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Call Type</label>
-        <div className="flex gap-4">
-          <label className="flex items-center cursor-pointer">
+        <div className="mb-6 flex items-center gap-3"><div className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-container-low text-primary"><span className="material-symbols-outlined">add_task</span></div><div><h3 className="text-xl font-semibold">New Evaluation</h3><p className="text-sm text-on-surface-variant">Paste transcript to initiate clinical AI analysis.</p></div></div>
+        <label className="mb-3 block text-xs font-bold uppercase tracking-wider text-on-surface-variant">Evaluation Type</label>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <label className={`cursor-pointer rounded-lg border p-4 transition-colors ${callType === 'kickoff' ? 'border-primary bg-surface-container-low' : 'border-outline-variant'}`}>
             <input
               type="radio"
               value="kickoff"
               checked={callType === 'kickoff'}
               onChange={(e) => setCallType(e.target.value as 'kickoff')}
-              className="mr-2"
+              className="sr-only"
             />
-            Kick-off Call
+            <span className="flex items-center justify-between font-semibold"><span>Kick-off Call</span><span className="material-symbols-outlined text-primary">rocket_launch</span></span><span className="mt-2 block text-sm text-on-surface-variant">Standard onboarding and setup evaluation.</span>
           </label>
-          <label className="flex items-center cursor-pointer">
+          <label className={`cursor-pointer rounded-lg border p-4 transition-colors ${callType === 'coaching' ? 'border-primary bg-surface-container-low' : 'border-outline-variant'}`}>
             <input
               type="radio"
               value="coaching"
               checked={callType === 'coaching'}
               onChange={(e) => setCallType(e.target.value as 'coaching')}
-              className="mr-2"
+              className="sr-only"
             />
-            Coaching Call
+            <span className="flex items-center justify-between font-semibold"><span>Coaching Session</span><span className="material-symbols-outlined text-primary">psychology</span></span><span className="mt-2 block text-sm text-on-surface-variant">In-depth performance and feedback analysis.</span>
           </label>
         </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Transcript
-        </label>
+        <label className="mb-3 block text-xs font-bold uppercase tracking-wider text-on-surface-variant">Transcript Evidence</label>
         <textarea
           value={transcript}
           onChange={(e) => setTranscript(e.target.value)}
-          rows={20}
-          className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
-          placeholder="Paste transcript here... [Speaker]: text"
+          rows={10}
+          className="w-full resize-none rounded-lg border border-outline-variant bg-surface-bright p-4 font-mono text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+          placeholder="Paste full call transcript here. Ensure timestamps are included for accurate citation mapping..."
         />
       </div>
 
+      <div className="flex justify-end gap-3">
       <button
         type="submit"
         disabled={isSubmitting || !transcript.trim()}
-        className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
+        className="flex items-center gap-2 rounded-lg bg-primary px-6 py-2 font-semibold text-white shadow-sm hover:bg-primary-container disabled:cursor-not-allowed disabled:bg-outline"
       >
-        {isSubmitting ? 'Starting Evaluation...' : 'Evaluate Call'}
+        <span className="material-symbols-outlined">memory</span>{isSubmitting ? 'Starting Evaluation...' : 'Run Analysis'}
       </button>
+      </div>
     </form>
   );
 }
