@@ -153,6 +153,8 @@ ${transcript}
 Evaluate this ${callType} call transcript against the rubric above. Return ONLY raw JSON — no markdown, no explanations outside the JSON.`;
 
   let lastError: Error | null = null;
+  const controller = new AbortController();
+  const abortTimer = setTimeout(() => controller.abort(), 27000);
 
   // Use one bounded request so provider failures become visible quickly.
   for (let attempt = 1; attempt <= 1; attempt++) {
@@ -166,6 +168,7 @@ Evaluate this ${callType} call transcript against the rubric above. Return ONLY 
         response_format: { type: 'json_object' },
         temperature: 0.1,
         max_tokens: 2400,
+        signal: controller.signal,
       });
 
       const content = response.choices[0].message.content;
@@ -181,5 +184,6 @@ Evaluate this ${callType} call transcript against the rubric above. Return ONLY 
     }
   }
 
+  clearTimeout(abortTimer);
   throw new Error(`AI evaluation failed: ${lastError?.message || 'Unknown provider error'}`);
 }
