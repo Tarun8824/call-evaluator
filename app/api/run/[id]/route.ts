@@ -10,9 +10,9 @@ export async function GET(
   }
 
   const isActive = run.status === 'pending' || run.status === 'running';
-  const isStale = Date.now() - new Date(run.updated_at).getTime() > 10 * 60 * 1000;
+  const isStale = Date.now() - new Date(run.updated_at).getTime() > 40 * 1000;
   if (isActive && isStale) {
-    const message = 'Evaluation timed out before the evaluator completed. Please submit the transcript again.';
+    const message = 'Evaluation exceeded the 40-second limit. Please submit the transcript again.';
     await updateRunStatus(run.id, 'failed', undefined, message);
     run.status = 'failed';
     run.error_message = message;
