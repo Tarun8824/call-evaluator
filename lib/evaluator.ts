@@ -168,8 +168,7 @@ Evaluate this ${callType} call transcript against the rubric above. Return ONLY 
         response_format: { type: 'json_object' },
         temperature: 0.1,
         max_tokens: 2400,
-        signal: controller.signal,
-      });
+      }, { signal: controller.signal });
 
       const content = response.choices[0].message.content;
       if (!content) throw new Error('Empty response from Groq');
